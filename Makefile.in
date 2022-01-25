@@ -1,0 +1,29 @@
+.POSIX:
+.SUFFIXES:
+.SUFFIXES: .c .uto
+
+CC         = @CC@
+CCOV       = gcov
+CFLAGS     = @CFLAGS@
+CFLAGS_COV = @CFLAGS_COV@
+CFLAGS_SAN = @CFLAGS_SAN@
+
+.PHONY: all
+all: ini.coverage
+
+.c.uto:
+	$(CC) $(CFLAGS) $(CFLAGS_COV) $(CFLAGS_SAN) -c $^ -o $@
+
+ini.coverage: ini.uto test_ini.c
+	$(CC) $(CFLAGS) $(CFLAGS_COV) $(CFLAGS_SAN) $^ -o $@
+	./$@
+	$(CCOV) ini.c
+	! grep "#####" ini.c.gcov |grep -ve "// UNREACHABLE$$"
+
+.PHONY: clean
+clean:
+	rm -rf *.uto *.gc?? *.coverage
+
+.PHONY: distclean
+distclean: clean
+	rm -f Makefile config.status
