@@ -1,0 +1,19 @@
+-2
+error: line 1, Empty section.
+error: line 2, Group names may contain all ASCII characters except for [ and ] and control characters.
+error: line 3, Group names may contain all ASCII characters except for [ and ] and control characters.
+error: line 4, Missing section terminator ']'
+error: line 5, Group names may contain all ASCII characters except for [ and ] and control characters.
+error: line 2, Missing key separator '='.
+error: line 4, Key names may contain characters A-Za-z0-9-.
+[Trailing commented] '42'='0x2a'
+[Trailing] 'k'='v'
+error: line 2, Empty key.
+error, line 2, Line too long.
+error, line 2, Line too long.
+[Section] 'key'='long value'
+[ Section 2 ] 'key'='value1  '
+[ Section 2 ] 'key'='value2  '
+[ Section 2 ] 'key'='value3'
+[Section C] 'Key'='Value ...continued'
+error: line 6, Missing key separator '='.
