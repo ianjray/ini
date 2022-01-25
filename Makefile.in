@@ -1,0 +1,25 @@
+.POSIX:
+.SUFFIXES:
+
+CC         = @CC@
+CCOV       = gcov
+CFLAGS     = @CFLAGS@
+CFLAGS_COV = @CFLAGS_COV@
+CFLAGS_SAN = @CFLAGS_SAN@
+
+.PHONY: all
+all: ini.coverage
+
+ini.coverage: ini.c test_ini.c
+	$(CC) $(CFLAGS) $(CFLAGS_COV) $(CFLAGS_SAN) $^ -o $@
+	./$@
+	$(CCOV) ini.c
+	! grep "#####" ini.c.gcov |grep -ve "// UNREACHABLE$$"
+
+.PHONY: clean
+clean:
+	rm -rf *.gc?? *.coverage
+
+.PHONY: distclean
+distclean: clean
+	rm -f Makefile config.status
