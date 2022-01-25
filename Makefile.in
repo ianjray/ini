@@ -1,0 +1,75 @@
+.POSIX:
+.SUFFIXES:
+.SUFFIXES: .c .o .uto
+
+VERSION    = 1.0.0
+
+CC         = @CC@
+CCOV       = gcov
+CFLAGS     = @CFLAGS@
+CFLAGS_COV = @CFLAGS_COV@
+CFLAGS_SAN = @CFLAGS_SAN@
+INCLUDEDIR = @PREFIX@/include
+LD         = @LD@
+LIBDIR     = @PREFIX@/lib
+PREFIX     = @PREFIX@
+
+.PHONY: all
+all: libini.a
+all: test_readme
+all: ini.coverage
+
+libini.a: ini.o
+	$(LD) -r $^ -o $@
+
+.c.o:
+	$(CC) $(CFLAGS) -c $< -o $@
+
+.c.uto:
+	$(CC) $(CFLAGS) $(CFLAGS_COV) $(CFLAGS_SAN) -c $^ -o $@
+
+test_readme: README.md libini.a
+	awk '/```c/{ C=1; next } /```/{ C=0 } C' README.md | sed -e 's#libini/##' > test_readme.c
+	$(CC) $(CFLAGS) $(CFLAGS_SAN) -I. test_readme.c ini.c -o $@
+	./$@
+
+ini.coverage: ini.uto test_ini.c
+	$(CC) $(CFLAGS) $(CFLAGS_COV) $(CFLAGS_SAN) $^ -o $@
+	./$@
+	$(CCOV) ini.c
+	! grep "#####" ini.c.gcov
+
+libini.pc:
+	( echo 'Name: libini' ;\
+	echo 'Version: $(VERSION)' ;\
+	echo 'Description: C .ini File Parser' ;\
+	echo 'prefix=$(PREFIX)' ;\
+	echo 'exec_prefix=$${prefix}' ;\
+	echo 'includedir=$${prefix}/include' ;\
+	echo 'libdir=$${prefix}/lib' ;\
+	echo 'Cflags: -I$${includedir}' ;\
+	echo 'Libs: -L$${libdir} -lini' ) > $@
+
+.PHONY: install
+install: ini.h libini.a libini.pc
+	mkdir -p $(INCLUDEDIR)/libini
+	mkdir -p $(LIBDIR)/pkgconfig
+	install -m644 ini.h $(INCLUDEDIR)/libini/ini.h
+	install -m644 libini.a $(LIBDIR)/libini.a
+	install -m644 libini.pc $(LIBDIR)/pkgconfig/libini.pc
+
+.PHONY: uninstall
+uninstall:
+	rm -f $(INCLUDEDIR)/libini/ini.h
+	rm -f $(LIBDIR)/libini.a
+	rm -f $(LIBDIR)/pkgconfig/libini.pc
+
+.PHONY: clean
+clean:
+	rm -rf *.o *.uto *.gc?? *.coverage
+	rm -f libini.a libini.pc
+	rm -f test_readme*
+
+.PHONY: distclean
+distclean: clean
+	rm -f Makefile config.status
