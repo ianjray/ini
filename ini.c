@@ -155,12 +155,14 @@ int ini_read(const char * filename, void (*callback)(const char * section, const
                 continue;
             }
 
+#ifndef NO_BACKSLASH_CONCATENATE
             if (buffer[r - 2] == '\\') {
                 // Concatenate Lines ending in backslash. [2]
                 buffer[r - 2] = ' ';
                 strcat(line, p);
                 continue;
             }
+#endif
 
             strcat(line, p);
         }
